@@ -21,7 +21,9 @@ use NetSuite\Classes\RecordRef;
 use NetSuite\Classes\SearchPreferences;
 use NetSuite\Classes\TokenPassport;
 use NetSuite\Classes\TokenPassportSignature;
+use RuntimeException;
 use SoapClient;
+use SoapFault;
 use SoapHeader;
 
 class NetSuiteClient
@@ -39,7 +41,7 @@ class NetSuiteClient
      */
     private $soapHeaders = array();
     /**
-     * @var \NetSuite\Logger
+     * @var Logger
      */
     private $logger;
 
@@ -47,6 +49,7 @@ class NetSuiteClient
      * @param array $config
      * @param array $options
      * @param SoapClient $client
+     * @throws SoapFault
      */
     public function __construct($config = null, $options = [], $client = null)
     {
@@ -58,7 +61,7 @@ class NetSuiteClient
         $this->validateConfig($this->config);
         $options = $this->createOptions($this->config, $options);
         $wsdl = $this->createWsdl($this->config);
-        $this->client = $client ?: new SoapClient($wsdl, $options);
+        $this->client = $client ? new $client($wsdl, $options) : new SoapClient($wsdl, $options);
         if ($this->config['host'] == 'https://webservices.netsuite.com') {
             // Fetch the data center URL for this account because the user
             // provided the legacy webservices URL.
@@ -142,7 +145,7 @@ class NetSuiteClient
         ];
         foreach ($requiredParams as $key) {
             if (!isset($config[$key]) || empty($config[$key])) {
-                throw new \RuntimeException('Config key missing: '.$key);
+                throw new RuntimeException('Config key missing: '.$key);
             }
         }
     }
@@ -156,16 +159,17 @@ class NetSuiteClient
      *
      * This method will be removed in some future version.
      *
+     * @param array $options
+     * @param SoapClient $client
+     *
+     * @return NetSuiteClient
+     * @throws SoapFault
      * @deprecated
      *
-     * @param array $options
-     * @param \SoapClient $client
-     *
-     * @return \NetSuite\NetSuiteClient
      */
     public static function createFromEnv(
         array $options = [],
-        \SoapClient $client = null
+        SoapClient $client = null
     ) {
         $config = self::getEnvConfig();
 
