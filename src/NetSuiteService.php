@@ -20,6 +20,7 @@
 
 namespace NetSuite;
 
+use Exception;
 use NetSuite\Classes;
 
 class NetSuiteService extends NetSuiteClient {

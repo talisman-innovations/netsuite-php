@@ -12,6 +12,7 @@
 
 namespace NetSuite;
 
+use Exception;
 use NetSuite\Classes\ApplicationInfo;
 use NetSuite\Classes\GetDataCenterUrlsRequest;
 use NetSuite\Classes\Passport;
@@ -172,11 +173,25 @@ class NetSuiteClient
     }
 
     /**
+     * @param null $key
+     * @return array|bool
+     */
+    public function getConfig($key = null)
+    {
+        if ($key === null) {
+            return $this->config;
+        }
+
+        return isset($this->config[$key]) ? $this->config[$key] : null;
+    }
+
+    /**
      * Make the SOAP call!
      *
      * @param string $operation
      * @param mixed $parameter
      * @return mixed
+     * @throws Exception
      */
     protected function makeSoapCall($operation, $parameter)
     {
@@ -194,7 +209,7 @@ class NetSuiteClient
             $response = $this->client->__soapCall($operation, array($parameter), null, $this->soapHeaders);
             $this->logSoapCall($operation);
             return $response;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logSoapCall($operation);
             throw $e;
         }
