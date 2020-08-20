@@ -227,7 +227,7 @@ class NetSuiteClient
      * @param array $config
      * @return string
      */
-    private function createWsdl($config)
+    public function createWsdl($config)
     {
         return $config['host'].'/wsdl/v'.$config['endpoint'].'_0/netsuite.wsdl';
     }
